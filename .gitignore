@@ -1,0 +1,5 @@
+calibration.json
+*.py[cod]
+.idea
+.direnv
+.envrc

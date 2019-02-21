@@ -1,0 +1,179 @@
+.shit-blue {
+  color: #2394B6;
+}
+
+.main-title {
+  font-weight: 900;
+}
+
+#content-wrapper {
+  /*margin-top: 20px;*/
+}
+
+#summary-title {
+  display: none;
+}
+
+.geo-home-buttons {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.geo-arrow-wrapper {
+  display: none;
+}
+
+.geo-arrow {
+  font-size: 60px;
+  /*display: none;*/
+}
+
+.car-image-wrapper {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+
+  position: relative;
+  width: 300px;
+}
+
+/*  Arrow positions */
+.geo-right-rear-wheel {
+  position: absolute;
+  bottom: 62px;
+  right: -2px;
+}
+
+.geo-right-rear-rail {
+  position: absolute;
+  bottom: 105px;
+  right: -2px;
+}
+
+.geo-right-front-wheel {
+  position: absolute;
+  bottom: 270px;
+  right: -2px;
+}
+
+.geo-right-front-rail {
+  position: absolute;
+  bottom: 225px;
+  right: -2px;
+}
+
+.geo-left-rear-wheel {
+  position: absolute;
+  bottom: 62px;
+  left: 10px;
+}
+
+.geo-left-rear-rail {
+  position: absolute;
+  bottom: 105px;
+  left: 10px;
+}
+
+.geo-left-front-wheel {
+  position: absolute;
+  bottom: 270px;
+  left: 10px;
+}
+
+.geo-left-front-rail {
+  position: absolute;
+  bottom: 225px;
+  left: 10px;
+}
+
+/* Results positions */
+#results-car-image-wrapper {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+  position: relative;
+  width: 300px;
+  /*height: 600px;*/
+}
+
+#right-rear-result-wrapper {
+  position: absolute;
+  bottom: 62px;
+  right: -5px;
+}
+
+#right-front-result-wrapper {
+  position: absolute;
+  bottom: 270px;
+  right: -5px;
+}
+
+#left-rear-result-wrapper {
+  position: absolute;
+  bottom: 62px;
+  left: -5px;
+}
+
+#left-front-result-wrapper {
+  position: absolute;
+  bottom: 270px;
+  left: -5px;
+}
+
+#results {
+  display: none;
+}
+
+.btn-geo {
+  color: #ffffff;
+  background-color: #2394B6;
+  border-color: #2394B6;
+}
+
+.btn-xl,
+.btn-group-xl > .btn {
+  padding: 15px 26px;
+  font-size: 25px;
+  line-height: 1.3333333;
+  border-radius: 6px;
+}
+
+.btn-geo:hover,
+.btn-geo:focus,
+.btn-geo:active,
+.btn-geo.active,
+.open .dropdown-toggle.btn-geo {
+  color: #ffffff;
+  background-color: #26BDEB;
+  border-color: #2394B6;
+}
+
+.btn-geo:active,
+.btn-geo.active,
+.open .dropdown-toggle.btn-geo {
+  background-image: none;
+}
+
+.btn-geo.disabled,
+.btn-geo[disabled],
+fieldset[disabled] .btn-geo,
+.btn-geo.disabled:hover,
+.btn-geo[disabled]:hover,
+fieldset[disabled] .btn-geo:hover,
+.btn-geo.disabled:focus,
+.btn-geo[disabled]:focus,
+fieldset[disabled] .btn-geo:focus,
+.btn-geo.disabled:active,
+.btn-geo[disabled]:active,
+fieldset[disabled] .btn-geo:active,
+.btn-geo.disabled.active,
+.btn-geo[disabled].active,
+fieldset[disabled] .btn-geo.active {
+  background-color: #2394B6;
+  border-color: #2394B6;
+}
+
+.btn-geo .badge {
+  color: #2394B6;
+  background-color: #ffffff;
+}

@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Wheel Alignment{% endblock %}
+
+{% block title %}<span id="summary-title">Summary</span>{% endblock %}
+
+{% block content %}
+<div id="connecting" class="container-fluid">
+  <div class="row-fluid text-center">
+    <div class="col-xs-12">
+      <h2>Connecting...</h2>
+    </div>
+  </div>
+</div>
+
+<div id="take-measurements" class="container-fluid">
+  <div class="row-fluid text-center">
+    <div class="col-xs-12">
+      <h3>Take measurement from:</h3>
+      <h3 id="step-title" class="shit-blue"></h3>
+    </div>
+    <div class="col-xs-12">
+      <div class="car-image-wrapper">
+        <img src="{{ url_for('static', filename='images/car-top.jpg') }}" width="100%"/>
+
+        <div class="geo-right-rear-wheel geo-arrow-wrapper">
+          <span class="glyphicon glyphicon-arrow-left geo-arrow shit-blue" aria-hidden="true"></span>
+        </div>
+        <div class="geo-right-rear-rail geo-arrow-wrapper">
+          <span class="glyphicon glyphicon-arrow-left geo-arrow shit-blue" aria-hidden="true"></span>
+        </div>
+
+        <div class="geo-right-front-wheel geo-arrow-wrapper">
+          <span class="glyphicon glyphicon-arrow-left geo-arrow shit-blue" aria-hidden="true"></span>
+        </div>
+        <div class="geo-right-front-rail geo-arrow-wrapper">
+          <span class="glyphicon glyphicon-arrow-left geo-arrow shit-blue" aria-hidden="true"></span>
+        </div>
+
+        <div class="geo-left-rear-wheel geo-arrow-wrapper">
+          <span class="glyphicon glyphicon-arrow-right geo-arrow shit-blue" aria-hidden="true"></span>
+        </div>
+        <div class="geo-left-rear-rail geo-arrow-wrapper">
+          <span class="glyphicon glyphicon-arrow-right geo-arrow shit-blue" aria-hidden="true"></span>
+        </div>
+
+        <div class="geo-left-front-wheel geo-arrow-wrapper">
+          <span class="glyphicon glyphicon-arrow-right geo-arrow shit-blue" aria-hidden="true"></span>
+        </div>
+        <div class="geo-left-front-rail geo-arrow-wrapper">
+          <span class="glyphicon glyphicon-arrow-right geo-arrow shit-blue" aria-hidden="true"></span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-xs-12">
+      <button id="skip-wheel" type="button" class="btn btn-geo btn-xl btn-block geo-home-buttons">Skip Wheel</button>
+    </div>
+    <div class="col-xs-12">
+      <button id="take-measurement" type="button" class="btn btn-geo btn-xl btn-block geo-home-buttons">Take Measurement</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="results" class="container-fluid">
+  <div class="row-fluid text-center">
+    <div class="col-xs-12">
+      <div id="results-car-image-wrapper">
+        <img src="{{ url_for('static', filename='images/car-top-small.jpg') }}" width="100%"/>
+
+        <div id="right-rear-result-wrapper">
+          <h3 id="right-rear-result" class="shit-blue"></h3>
+          <p id="right-rear-confidence"></p>
+        </div>
+
+        <div id="right-front-result-wrapper">
+          <h3 id="right-front-result" class="shit-blue"></h3>
+          <p id="right-front-confidence"></p>
+        </div>
+
+        <div id="left-rear-result-wrapper">
+          <h3 id="left-rear-result" class="shit-blue"></h3>
+          <p id="left-rear-confidence"></p>
+        </div>
+
+        <div id="left-front-result-wrapper">
+          <h3 id="left-front-result" class="shit-blue"></h3>
+          <p id="left-front-confidence"></p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-xs-12">
+      <a href="/" role="button" class="btn btn-geo btn-xl btn-block geo-home-buttons">Return to Menu</a>
+    </div>
+
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+
+  // Global state.
+  var bnoData = null;
+  var currentStep = 0;
+  var stepsOrig = [
+    {title: 'Rear Right Wheel', value: null, arrowElement: $('.geo-right-rear-wheel')},         // 0
+    {title: 'Rear Right Chassis Rail', value: null, arrowElement: $('.geo-right-rear-rail')},  // 1
+    {title: 'Rear Right Wheel', value: null, arrowElement: $('.geo-right-rear-wheel')},         // 2
+    {title: 'Rear Right Chassis Rail', value: null, arrowElement: $('.geo-right-rear-rail')},  // 3
+
+    {title: 'Front Right Wheel', value: null, arrowElement: $('.geo-right-front-wheel')},        // 4
+    {title: 'Front Right Chassis Rail', value: null, arrowElement: $('.geo-right-front-rail')}, // 5
+    {title: 'Front Right Wheel', value: null, arrowElement: $('.geo-right-front-wheel')},        // 6
+    {title: 'Front Right Chassis Rail', value: null, arrowElement: $('.geo-right-front-rail')}, // 7
+
+    {title: 'Rear Left Wheel', value: null, arrowElement: $('.geo-left-rear-wheel')},          // 8
+    {title: 'Rear Left Chassis Rail', value: null, arrowElement: $('.geo-left-rear-rail')},   // 9
+    {title: 'Rear Left Wheel', value: null, arrowElement: $('.geo-left-rear-wheel')},          // 10
+    {title: 'Rear Left Chassis Rail', value: null, arrowElement: $('.geo-left-rear-rail')},   // 11
+
+    {title: 'Front Left Wheel', value: null, arrowElement: $('.geo-left-front-wheel')},         // 12
+    {title: 'Front Left Chassis Rail', value: null, arrowElement: $('.geo-left-front-rail')},  // 13
+    {title: 'Front Left Wheel', value: null, arrowElement: $('.geo-left-front-wheel')},         // 14
+    {title: 'Front Left Chassis Rail', value: null, arrowElement: $('.geo-left-front-rail')},  // 15
+  ];
+  var steps = stepsOrig;
+
+  // Start with measurements hidden until connected.
+  $('#take-measurements').hide();
+
+  // Take reading button click handler.
+  $('#take-measurement').click(function() {
+    // Store the current value
+    steps[currentStep].value = getBnoHeading();
+    console.log(steps);
+    // Check if its the last step
+    if (currentStep === 15) {
+      displaySummary();
+    }
+    // Else just move to next step
+    else {
+      currentStep++;
+      displayReadingInfo();
+    }
+
+  });
+
+  // Skip Wheel button click handler.
+  $('#skip-wheel').click(function() {
+    if (currentStep >= 0 && currentStep <= 3) {
+      currentStep = 4;
+      displayReadingInfo();
+    } else if (currentStep >= 4 && currentStep <= 7) {
+      currentStep = 8;
+      displayReadingInfo();
+    } else if (currentStep >= 8 && currentStep <= 11) {
+      currentStep = 12;
+      displayReadingInfo();
+    } else if (currentStep >= 12 && currentStep <= 15) {
+      displaySummary();
+    }
+  });
+
+  // Save calibration click handler calls the /save_calibration API.
+  $('#saveCalibration').click(function() {
+    $.post("{{ url_for('save_calibration') }}");
+  });
+
+  // Load calibration click handler calls the /load_calibration API.
+  $('#loadCalibration').click(function() {
+    $.post("{{ url_for('load_calibration') }}");
+  });
+
+  function displaySummary() {
+    $('#take-measurements').hide();
+    $('#results').show();
+    $('#summary-title').show();
+
+    // Right Rear
+    if (steps[0].value && steps[1].value && steps[2].value && steps[3].value) {
+      var result = calculateToe(steps[0].value, steps[1].value, steps[2].value, steps[3].value);
+      $('#right-rear-result').text(result[0] + '°');
+      $('#right-rear-confidence').text('Confidence ' + result[1] + '%');
+    } else {
+      $('#right-rear-result').text('Skipped');
+    }
+    // Right Front
+    if (steps[4].value && steps[5].value && steps[6].value && steps[7].value) {
+      var result = calculateToe(steps[4].value, steps[5].value, steps[6].value, steps[7].value);
+      $('#right-front-result').text(result[0] + '°');
+      $('#right-front-confidence').text('Confidence ' + result[1] + '%');
+    } else {
+      $('#right-front-result').text('Skipped');
+    }
+    // Left Rear
+    if (steps[8].value && steps[9].value && steps[10].value && steps[11].value) {
+      var result = calculateToe(steps[8].value, steps[9].value, steps[10].value, steps[11].value, true);
+      $('#left-rear-result').text(result[0] + '°');
+      $('#left-rear-confidence').text('Confidence ' + result[1] + '%');
+    } else {
+      $('#left-rear-result').text('Skipped');
+    }
+    // Left Front
+    if (steps[12].value && steps[13].value && steps[14].value && steps[15].value) {
+      var result = calculateToe(steps[12].value, steps[13].value, steps[14].value, steps[15].value, true);
+      $('#left-front-result').text(result[0] + '°');
+      $('#left-front-confidence').text('Confidence ' + result[1] + '%');
+    } else {
+      $('#left-front-result').text('Skipped');
+    }
+  }
+
+  function calculateConfidence(valOne, valTwo) {
+    return (100 - ((Math.abs(valOne - valTwo) / 360) * 100)).toFixed(0);
+  }
+
+  function calculateToe(valOne, valTwo, valThree, valFour, left=false) {
+    var angleOne = calcAngleTranslation(parseFloat(valOne), parseFloat(valTwo));
+    var angleTwo = calcAngleTranslation(parseFloat(valThree), parseFloat(valFour));
+    var averageAngle = (angleOne + angleTwo) / 2;
+    if (left) {
+      averageAngle = averageAngle * -1;
+    }
+    var confidence = calculateConfidence(angleOne, angleTwo);
+
+    return [averageAngle.toFixed(2), confidence];
+  }
+
+  // Function to calculate alignment
+  function calculateAlignment() {
+    // Toe angles (+/-) are measured opposite on left right
+    // If step is 1 we are looking at the left wheel
+    if (currentStep === 1) {
+      var angle = calcAngleTranslation(parseFloat(steps[0].value), parseFloat(steps[currentStep].value));
+      $('#left-wheel-alignment').text(angle * -1);
+    }
+    // if step is 2 we are looking at the right wheel
+    else if (currentStep === 2) {
+      $('#right-wheel-alignment').text(calcAngleTranslation(parseFloat(steps[0].value), parseFloat(steps[currentStep].value)));
+    }
+    else {
+      console.log('Not sure why this method is being called right now.');
+    }
+  }
+
+  // Function to calculate the relative angle translation clockwise/counter of two angles
+  // Clockwise being a positive translation and negative being a counter clockwise translation
+  function calcAngleTranslation(a, b) {
+    if (a === b) {
+        return 0;
+    }
+
+    var diff = b - a;
+    var abs_diff = Math.abs(diff);
+
+    if (abs_diff === 180) {
+      return abs_diff;
+    }
+    else if (abs_diff <= 180) {
+      return diff;
+    }
+    else if (b > a) {
+      return abs_diff - 360;
+    }
+    else {
+      return 360 - abs_diff;
+    }
+  }
+
+  // Function to calculate the closest diff of two angles
+  function closestAngleDiff(a, b) {
+    var phi = Math.abs((b - a)) % 360;
+    if (phi > 180) {
+      return 360 - phi;
+    }
+    return phi;
+  }
+
+  // Function to handle display of reading data
+  function displayReadingInfo() {
+    $('.geo-arrow-wrapper').hide();
+    $('#step-title').text(steps[currentStep].title);
+    steps[currentStep].arrowElement.show();
+  }
+  //displayReadingInfo();
+
+  function getBnoHeading() {
+    //return Math.random() * 359;
+    return bnoData.heading;
+  }
+
+  // Function called when a new sensor reading is received.
+  function updateSensorData(data) {
+    // Save the reading then update the UI.
+    bnoData = data;
+    //$('#heading').text(data.heading);
+    //$('#roll').text(data.roll);
+    //$('#pitch').text(data.pitch);
+    //$('#calSys').text(data.calSys);
+    //$('#calGyro').text(data.calGyro);
+    //$('#calAccel').text(data.calAccel);
+    //$('#calMag').text(data.calMag);
+  }
+
+  // Create server sent event connection to receive BNO sensor data.
+  var server = new EventSource('/bno');
+  // Add server sent event handlers.
+  server.onmessage = function(e) {
+    // Update BNO sensor values.
+    updateSensorData(JSON.parse(e.data));
+  };
+  server.onopen = function(e) {
+    // Hide connecting status and show controls when connection is made.
+    $('#connecting').hide();
+    $('#take-measurements').show();
+    displayReadingInfo();
+  };
+  server.onerror = function(e) {
+    // Hide controls and show connecting status if connection closes.
+    $('#take-measurements').hide();
+    $('#connecting').show();
+  };
+});
+</script>
+{% endblock %}
